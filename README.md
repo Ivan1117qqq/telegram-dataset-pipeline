@@ -16,14 +16,94 @@ python -m pytest tests -q
 
 ## 使用不同資料集
 
+### 1. 放置資料
+
+Repository 已包含以下空目錄，clone 後不需自行建立。`.gitkeep` 只是讓 Git 保留目錄，可以留著。
+
+```text
+data/raw/dataset_001/     第一份 Telegram export 放這裡
+data/raw/dataset_002/     第二份 Telegram export 放這裡
+outputs/dataset_001/      第一份資料的處理結果
+outputs/dataset_002/      第二份資料的處理結果
+```
+
+將 Telegram 匯出資料夾的**內容**複製到對應目錄，完成後應為：
+
+```text
+data/raw/dataset_001/
+├── .gitkeep
+├── messages.html
+├── messages2.html         有幾頁就保留幾頁
+├── photos/
+├── files/
+└── ...                   其餘 Telegram 匯出檔案也保留
+```
+
+不要多包一層成 `dataset_001/ChatExport_xxx/messages.html`；若已如此放置，
+請將 `--input-dir` 改為實際包含 HTML 的目錄。Parser 不會遞迴搜尋子目錄。
+不要合併不同 export 的 HTML，也不要為了符合範例自行改名。
+第三份以上可自行新增 `data/raw/dataset_003/`，輸出用 `outputs/dataset_003/`；仍會被 Git 排除。
+
+### 2. 在專案根目錄執行
+
+VS Code 選「終端機 → 新增終端機」。下列指令以 PowerShell 為例，
+目前目錄必須包含 `scripts/` 與本 README。先確認：
+
+```powershell
+Get-Location
+Test-Path scripts/preprocess_chat.py
+python --version
+```
+
+`Test-Path` 應顯示 `True`。若 Python 指令不存在，先安裝 Python 3.13 並重開終端機；
+若電腦只有 `py` 指令，可把下列 `python` 換成 `py -3.13`。
+只做資料處理不需要安裝 pytest，也不需要 API key。
+
 每個 Telegram export 放在獨立目錄，例如 `data/raw/dataset_001/`，內含
 `messages*.html` 及原有附件目錄。原始資料僅供讀取，不需提交 Git。
 既有匯出若已在專案根目錄，可使用 `--input-dir .`，不必搬動原始資料。
 
 ```powershell
 python scripts/preprocess_chat.py --input-dir data/raw/dataset_001 --output outputs/dataset_001/processed/messages.jsonl
+```
+
+先檢查 `outputs/dataset_001/processed/preprocessing_report.json` 的 errors / warnings；
+有錯誤時先停下來確認原始結構。解析成功後再執行統計：
+
+```powershell
 python scripts/profile_dataset.py --input outputs/dataset_001/processed/messages.jsonl --output-dir outputs/dataset_001/analysis
+```
+
+優先閱讀 `outputs/dataset_001/analysis/profiling_report.md` 與
+`sample_conversations.txt`，核對統計並人工查看上下文。
+如需候選切分，再執行（不代表最終案件標註）：
+
+```powershell
 python scripts/segment_conversations.py --input outputs/dataset_001/processed/messages.jsonl --output-dir outputs/dataset_001/segmentation
+```
+
+切分結果與 review 文件在 `outputs/dataset_001/segmentation/`。
+上述程式會自動建立輸出子目錄。相同輸出路徑重跑會更新產物，
+若要保留不同實驗版本，請改用新的輸出目錄。
+
+### 3. 第二份資料的指令
+
+```powershell
+python scripts/preprocess_chat.py --input-dir data/raw/dataset_002 --output outputs/dataset_002/processed/messages.jsonl
+```
+
+確認解析報告後執行：
+
+```powershell
+python scripts/profile_dataset.py --input outputs/dataset_002/processed/messages.jsonl --output-dir outputs/dataset_002/analysis
+python scripts/segment_conversations.py --input outputs/dataset_002/processed/messages.jsonl --output-dir outputs/dataset_002/segmentation
+```
+
+### 4. 角色與 Agent 分析（選用）
+
+先建立行為統計與人工填寫的角色表：
+
+```powershell
 python scripts/analyze_sender_roles.py --input outputs/dataset_001/processed/messages.jsonl --output-dir outputs/dataset_001/roles --evidence-sender ""
 ```
 
@@ -68,8 +148,8 @@ python scripts/audit_agent_interactions.py --messages outputs/dataset_001/proces
 
 ## Git 上傳範圍
 
-`.gitignore` 採白名單：只允許此 README、設定、指定 Python scripts 與合成測試。
-原始 HTML、附件、data/、outputs/、reports/、角色 mapping 及分析抽樣均不提交。
+`.gitignore` 採白名單：只允許此 README、設定、指定 Python scripts、合成測試及四個目錄佔位 `.gitkeep`。
+原始 HTML、附件、data/ 與 outputs/ 內的實際資料、reports/、角色 mapping 及分析抽樣均不提交。
 新增程式時需要明確更新白名單。不要使用 `git add -f` 將排除的資料強制加入。
 
 推送前用 `git diff --cached --name-only` 檢查上傳清單。

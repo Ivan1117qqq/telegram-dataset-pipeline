@@ -20,3 +20,21 @@
 !/tests/test_telegram_parser.py
 # Raw exports, attachments, role mappings, reports and generated outputs
 # are intentionally excluded by the root allowlist above.
+!/data/
+/data/*
+!/data/raw/
+/data/raw/*
+!/data/raw/dataset_001/
+!/data/raw/dataset_002/
+/data/raw/dataset_001/*
+/data/raw/dataset_002/*
+!/data/raw/dataset_001/.gitkeep
+!/data/raw/dataset_002/.gitkeep
+!/outputs/
+/outputs/*
+!/outputs/dataset_001/
+!/outputs/dataset_002/
+/outputs/dataset_001/*
+/outputs/dataset_002/*
+!/outputs/dataset_001/.gitkeep
+!/outputs/dataset_002/.gitkeep
