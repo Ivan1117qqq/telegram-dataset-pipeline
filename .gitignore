@@ -1,0 +1,22 @@
+# Default deny: only reviewed source files belong in this repository.
+/*
+!/.gitignore
+!/README.md
+!/requirements-dev.txt
+!/pytest.ini
+!/scripts/
+!/tests/
+/scripts/*
+!/scripts/preprocess_chat.py
+!/scripts/profile_dataset.py
+!/scripts/segment_conversations.py
+!/scripts/analyze_single_conversations.py
+!/scripts/analyze_sender_roles.py
+!/scripts/reconstruct_agent_conversations.py
+!/scripts/audit_agent_interactions.py
+!/scripts/verify_existing_pipeline.py
+!/scripts/validate_raw_parser.py
+/tests/*
+!/tests/test_telegram_parser.py
+# Raw exports, attachments, role mappings, reports and generated outputs
+# are intentionally excluded by the root allowlist above.

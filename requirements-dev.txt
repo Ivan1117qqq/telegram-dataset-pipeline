@@ -1,0 +1,2 @@
+# Test-only; production pipeline uses Python standard library.
+pytest==9.1.1
